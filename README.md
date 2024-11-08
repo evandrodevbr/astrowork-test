@@ -1,54 +1,85 @@
-# Astro Starter Kit: Basics
+# Reddit Posts Explorer 🚀
 
-```sh
-npm create astro@latest -- --template basics
+Um explorador de posts do Reddit focado em Inteligência Artificial, permitindo buscar, filtrar e analisar posts do subreddit r/artificial.
+
+## 🛠 Tecnologias Utilizadas
+
+- **Frontend:**
+  - Astro.js
+  - TailwindCSS
+  - TypeScript
+
+- **Backend:**
+  - MongoDB
+  - Mongoose
+  - API REST
+
+## 🌟 Funcionalidades Principais
+
+- Busca automática de posts do Reddit
+- Filtragem por data
+- Ordenação por upvotes e comentários
+- Interface responsiva e intuitiva
+
+## 📚 Documentação
+
+Documentação detalhada disponível na pasta [`/docs`](/docs):
+- [Documentação Técnica](/docs/Technical.md) - Detalhes de implementação e arquitetura
+- [Documentação da API](/docs/api.md) - Endpoints e exemplos de uso
+
+## 🚀 Como Começar
+
+1. Clone o repositório
+```bash
+git clone https://github.com/seu-usuario/reddit-posts-explorer.git
 ```
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/basics)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/basics/devcontainer.json)
+2. Instale as dependências
+```bash
+npm install
+```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+3. Configure as variáveis de ambiente
+```bash
+cp .env.example .env
+```
 
-![just-the-basics](https://github.com/withastro/astro/assets/2244813/a0a5533c-a856-4198-8470-2d67b1d7c554)
+4. Inicie o servidor de desenvolvimento
+```bash
+npm run dev
+```
 
-## 🚀 Project Structure
+## 📦 Estrutura do Projeto
 
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-│   └── favicon.svg
+```
 ├── src/
-│   ├── components/
-│   │   └── Card.astro
 │   ├── layouts/
-│   │   └── Layout.astro
-│   └── pages/
-│       └── index.astro
-└── package.json
+│   ├── lib/
+│   ├── pages/
+│   └── types/
+├── docs/
+│   ├── api.md
+│   └── Technical.md
+└── README.md
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## 🤝 Contribuindo
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+1. Faça um Fork do projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
 
-Any static assets, like images, can be placed in the `public/` directory.
+## 📝 Licença
 
-## 🧞 Commands
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
-All commands are run from the root of the project, from a terminal:
+## 🔗 Links Úteis
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+- [Astro.js Documentation](https://docs.astro.build)
+- [TailwindCSS Documentation](https://tailwindcss.com/docs)
+- [MongoDB Documentation](https://docs.mongodb.com)
 
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+---
+Desenvolvido com ❤️ por Evandro Fonseca Junior
