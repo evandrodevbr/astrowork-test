@@ -1,0 +1,251 @@
+---
+import Layout from "../layouts/Work.astro";
+import { RedditService } from "../lib/services/redditService";
+import { connectDB } from "../lib/db/connect";
+import type { Post } from "../types/Post";
+
+// Conectar ao MongoDB
+await connectDB();
+
+// Obter dados iniciais (últimos 7 dias)
+const endDate = new Date().toISOString();
+const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+const redditService = new RedditService();
+let posts: Post[] = [];
+try {
+  posts = await redditService.getFilteredPosts(startDate, endDate, "ups");
+} catch (error) {
+  console.error("Failed to fetch initial posts:", error);
+}
+---
+
+<Layout title="Reddit Posts Explorer">
+  <div class="space-y-6">
+    <!-- Controls Section -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label for="startDate" class="block text-sm font-medium text-gray-700"
+            >Start Date</label
+          >
+          <input
+            type="date"
+            id="startDate"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          />
+        </div>
+        <div>
+          <label for="endDate" class="block text-sm font-medium text-gray-700"
+            >End Date</label
+          >
+          <input
+            type="date"
+            id="endDate"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          />
+        </div>
+        <div>
+          <label for="orderBy" class="block text-sm font-medium text-gray-700"
+            >Order By</label
+          >
+          <select
+            id="orderBy"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          >
+            <option value="ups">Upvotes</option>
+            <option value="num_comments">Comments</option>
+          </select>
+        </div>
+      </div>
+      <div class="mt-4 flex space-x-4">
+        <button
+          id="fetchPosts"
+          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          Fetch New Posts
+        </button>
+        <button
+          id="filterPosts"
+          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+        >
+          Filter Posts
+        </button>
+      </div>
+    </div>
+
+    <!-- Posts List -->
+    <div id="postsList" class="space-y-4">
+      {
+        posts.map((post) => (
+          <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold text-gray-900">{post.title}</h2>
+            <div class="mt-2 flex items-center text-sm text-gray-500 space-x-4">
+              <span>👤 {post.author_fullname}</span>
+              <span>⬆️ {post.ups} upvotes</span>
+              <span>💬 {post.num_comments} comments</span>
+              <span>📅 {new Date(post.created_date).toLocaleDateString()}</span>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+
+  <script>
+    // Função para mostrar mensagens de erro/sucesso
+    function showMessage(message: string, type: "success" | "error") {
+      const alertDiv = document.createElement("div");
+      alertDiv.className = `fixed top-4 right-4 p-4 rounded-lg ${
+        type === "success" ? "bg-green-500" : "bg-red-500"
+      } text-white`;
+      alertDiv.textContent = message;
+      document.body.appendChild(alertDiv);
+      setTimeout(() => alertDiv.remove(), 5000);
+    }
+
+    // Função fetchApi corrigida
+    async function fetchApi(url: string, options = {}) {
+      try {
+        const defaultOptions = {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          ...options,
+        };
+
+        const response = await fetch(url, defaultOptions);
+        const responseData = await response.text();
+
+        let parsedData;
+        try {
+          parsedData = JSON.parse(responseData);
+        } catch (e) {
+          console.error("Response:", responseData);
+          throw new Error("Invalid JSON response");
+        }
+
+        if (!response.ok) {
+          throw new Error(
+            JSON.stringify({
+              status: response.status,
+              statusText: response.statusText,
+              data: parsedData,
+            })
+          );
+        }
+
+        return parsedData;
+      } catch (error) {
+        console.error("API Error:", {
+          message: error instanceof Error ? error.message : "Unknown error",
+          url,
+        });
+        throw error;
+      }
+    }
+
+    // Função para atualizar a lista de posts
+    function updatePostsList(posts: any[]) {
+      const postsListElement = document.getElementById("postsList");
+      if (!postsListElement) return;
+
+      if (posts.length === 0) {
+        postsListElement.innerHTML = `
+          <div class="bg-white p-6 rounded-lg shadow-md text-center text-gray-500">
+            No posts found for the selected criteria
+          </div>
+        `;
+        return;
+      }
+
+      const postsHTML = posts
+        .map(
+          (post) => `
+        <div class="bg-white p-6 rounded-lg shadow-md">
+          <h2 class="text-xl font-semibold text-gray-900">${post.title}</h2>
+          <div class="mt-2 flex flex-wrap items-center text-sm text-gray-500 gap-4">
+            <span>👤 ${post.author_fullname}</span>
+            <span>⬆️ ${post.ups} upvotes</span>
+            <span>💬 ${post.num_comments} comments</span>
+            <span>📅 ${new Date(post.created_date).toLocaleDateString()}</span>
+          </div>
+        </div>
+      `
+        )
+        .join("");
+
+      postsListElement.innerHTML = postsHTML;
+    }
+
+    // Event Listeners
+    document
+      .getElementById("fetchPosts")
+      ?.addEventListener("click", async () => {
+        try {
+          const button = document.getElementById(
+            "fetchPosts"
+          ) as HTMLButtonElement;
+          button.disabled = true;
+          button.textContent = "Fetching...";
+
+          const data = await fetchApi("/api/posts/fetch");
+          if (data.success) {
+            updatePostsList(data.data);
+            showMessage("Posts fetched successfully!", "success");
+          } else {
+            showMessage(data.error || "Failed to fetch posts", "error");
+          }
+        } catch (error) {
+          showMessage("Error fetching posts. Please try again.", "error");
+        } finally {
+          const button = document.getElementById(
+            "fetchPosts"
+          ) as HTMLButtonElement;
+          button.disabled = false;
+          button.textContent = "Fetch New Posts";
+        }
+      });
+
+    document
+      .getElementById("filterPosts")
+      ?.addEventListener("click", async () => {
+        try {
+          const button = document.getElementById(
+            "filterPosts"
+          ) as HTMLButtonElement;
+          button.disabled = true;
+          button.textContent = "Filtering...";
+
+          const startDate = (
+            document.getElementById("startDate") as HTMLInputElement
+          ).value;
+          const endDate = (
+            document.getElementById("endDate") as HTMLInputElement
+          ).value;
+          const orderBy = (
+            document.getElementById("orderBy") as HTMLSelectElement
+          ).value;
+
+          const data = await fetchApi(
+            `/api/posts/filter?startDate=${startDate}&endDate=${endDate}&orderBy=${orderBy}`
+          );
+          if (data.success) {
+            updatePostsList(data.data);
+            showMessage("Posts filtered successfully!", "success");
+          } else {
+            showMessage(data.error || "Failed to filter posts", "error");
+          }
+        } catch (error) {
+          showMessage("Error filtering posts. Please try again.", "error");
+        } finally {
+          const button = document.getElementById(
+            "filterPosts"
+          ) as HTMLButtonElement;
+          button.disabled = false;
+          button.textContent = "Filter Posts";
+        }
+      });
+  </script>
+</Layout>
